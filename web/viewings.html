@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Перегляди - CRM для нерухомості</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="/">CRM для нерухомості</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Головна</a></li>
+                <li><a href="/faq">FAQ</a></li>
+                <li><a href="/login">Авторизація</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+
+    <main class="main-content">
+        <h2>Список переглядів</h2>
+        <div class="viewings-section">
+            <table id="viewingsTable" class="viewings-table">
+                <thead>
+                    <tr>
+                        <th>ID Нерухомості</th>
+                        <th>ID Власника</th>
+                        <th>Дата перегляду</th>
+                        <th>ДІЇ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        function deleteViewing(id) {
+    if (confirm('Ви впевнені, що хочете видалити перегляд?')) {
+        fetch(`/viewing/${id}`, { method: 'DELETE' })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Не вдалося видалити перегляд');
+                }
+                return response.json();
+            })
+            .then(() => {
+                location.reload(); 
+            })
+            .catch(error => {
+                console.error('Помилка:', error);
+                alert(error.message);
+            });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/viewings')
+        .then(response => response.json())
+        .then(viewings => {
+            const tableBody = document.querySelector('#viewingsTable tbody');
+
+            
+            tableBody.innerHTML = '';
+
+            if (viewings.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center">Немає переглядів!</td>
+                    </tr>
+                `;
+            } else {
+                viewings.forEach(viewing => {
+                    const row = `
+                        <tr>
+                            <td>${viewing.property_id}</td>
+                            <td>${viewing.client_id}</td>
+                            <td>${viewing.date}</td>
+                            <td>
+                                <button onclick="deleteViewing(${viewing.id})">Видалити</button>
+                                <button onclick="sendForViewing(${viewing.id})">Укласти угоду</button>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Помилка при завантаженні переглядів:', error);
+            alert('Не вдалося завантажити перегляди');
+        });
+});
+
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    fetch('/auth-status')
+        .then(response => response.json())
+        .then(data => {
+            const navMenu = document.querySelector('nav ul');
+
+            
+            navMenu.innerHTML = `
+                <li><a href="/">Головна</a></li>
+            `;
+            const logoutLink = document.querySelector('.logout-link');
+                if (logoutLink) {
+                    logoutLink.style.display = 'block'; 
+                }
+
+            if (data.isLoggedIn) {
+                if (data.user.role === 'agent') {
+                    
+                    navMenu.innerHTML += `
+                        <li><a href="/admin">Адмін панель</a></li>
+                        
+                    `;
+                } else if (data.user.role === 'user') {
+                    
+                    navMenu.innerHTML += `
+                        <li><a href="/catalog">Каталог</a></li>
+                        <li><a href="/catalog">Каталог</a></li>
+                        <li><a href="/properties">Додати нерухомість</a></li>
+                        <li><a href="/profile">Мій кабінет</a></li>
+                    `;
+                }
+
+            } else {
+                
+                navMenu.innerHTML += `
+                    <li><a href="/login">Авторизація</a></li>
+                    <li><a href="/faq">FAQ</a></li>
+                `;
+            }
+        })
+        .catch(err => console.error("Помилка при перевірці авторизації:", err));
+});
+    </script>
+    <script>
+        function sendForViewing(viewingId) {
+            fetch('/api/deals', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    viewingId: viewingId  
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.error || 'Невдалося укласти угоду');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Угода успішно укладена! ID: ' + data.dealId);  
+                location.reload();  
+            })
+            .catch(error => {
+                console.error('Помилка:', error);
+                alert(error.message);
+            });
+        }
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/viewings')
+                .then(response => response.json())
+                .then(viewings => {
+                    const tableBody = document.querySelector('#viewingsTable tbody');
+    
+                    tableBody.innerHTML = '';  
+    
+                    if (viewings.length === 0) {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="5" class="text-center">Немає переглядів!</td>
+                            </tr>
+                        `;
+                    } else {
+                        viewings.forEach(viewing => {
+                            const row = `
+                                <tr>
+                                    <td>${viewing.property_id}</td>
+                                    <td>${viewing.client_id}</td>
+                                    <td>${viewing.date}</td>
+                                    <td>
+                                        <button onclick="deleteViewing(${viewing.id})">Видалити</button>
+                                        <button onclick="sendForViewing(${viewing.id})">Укласти угоду</button>
+                                    </td>
+                                </tr>
+                            `;
+                            tableBody.innerHTML += row;
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Помилка при завантаженні переглядів:', error);
+                    alert('Не вдалося завантажити перегляди');
+                });
+        });
+    </script>
+    
+</body>
+</html>

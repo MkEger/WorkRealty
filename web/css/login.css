@@ -1,0 +1,145 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+html, body {
+    height: 100%;
+}
+body {
+    background-color: rgb(32, 32, 32) !important;
+    color: white !important; 
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+}
+.container {
+    width: 90%;
+    margin: auto;
+    overflow: hidden;
+}
+header {
+    background: #35424a;
+    color: #ffffff;
+    padding-top: 30px;
+    min-height: 85px;
+    border-bottom: #e8491d 3px solid;
+}
+header {
+    background: #35424a;
+    
+    padding-top: 30px;
+    min-height: 85px;
+    border-bottom: #e8491d 3px solid;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.logo a {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #efefef;
+    text-decoration: none;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links li {
+    margin-left: 20px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #fff8f8;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: #007bff;
+}
+
+
+form {
+    max-width: 300px;
+    width: 100%; /* Зробити форму адаптивною */
+    background-color: #444; /* Додатково: фон форми */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.content {
+    flex: 1 0 auto;
+    display: flex; /* Включаємо flexbox */
+    justify-content: center; /* Центруємо по горизонталі */
+    align-items: center; /* Центруємо по вертикалі */
+     /* Висота контенту з урахуванням header і footer */
+}
+.Url_reg{
+    color: #cc6710;
+    justify-content: center;
+    margin-top: 20px;
+}
+form {
+    max-width: 300px;
+    width: 100%; /* Зробити форму адаптивною */
+    background-color: #444; /* Додатково: фон форми */
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.content {
+    flex: 1 0 auto;
+}
+.content h2{
+    text-align: center;
+}
+footer {
+    flex-shrink: 0;
+    padding: 20px;
+    color: #ffffff;
+    background-color: #191818;
+    text-align: center;
+}
+footer a {
+    color: #ffffff;
+    font-size: 24px;
+    margin: 0 10px;
+}
+form {
+    max-width: 300px;
+    margin: 20px auto;
+}
+input[type="email"],
+input[type="password"],
+input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+input[type="submit"] {
+    background-color: #e8491d;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+@media(max-width: 768px) {
+    header h1, nav, nav li {
+        float: none;
+        text-align: center;
+        width: 100%;
+    }
+}

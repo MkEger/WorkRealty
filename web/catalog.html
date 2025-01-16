@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Каталог нерухомості</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="css/catalog.css">
+    <style>
+        .property-card {
+            transition: transform 0.3s ease;
+        }
+        .property-card:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<header>
+    <nav>
+        <div class="logo">
+            <a href="/">CRM для нерухомості</a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Головна</a></li>
+            <li><a href="/faq">FAQ</a></li>
+            
+            <!-- Динамічні посилання -->
+            <li class="auth-buttons">
+                <a href="/login">Авторизація</a>
+            </li>
+            
+            <!-- Посилання для авторизованих -->
+            <li class="user-info" style="display:none;">
+                <a href="/profile"></a>
+            </li>
+            
+            <!-- Адмін-панель (з перевіркою прав) -->
+            <li class="admin-link" style="display:none;">
+                <a href="/admin">Адмін панель</a>
+            </li>
+            
+            <!-- Вихід -->
+            <li class="logout-link" style="display:none;">
+                <a href="/properties">Додати нерухомість</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<body>
+    <div class="container-fluid">
+        <h1 class="text-center my-4">Каталог нерухомості</h1>
+        
+        <div class="row mb-4">
+            <div class="col-md-8 offset-md-2">
+                <div class="input-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Пошук нерухомості (назва, адреса, тип)">
+                    <select id="typeFilter" class="form-select" style="max-width: 200px;">
+                        <option value="">Усі типи</option>
+                        <option value="Квартира">Квартира</option>
+                        <option value="Будинок">Будинок</option>
+                        <option value="Земельна ділянка">Земельна ділянка</option>
+                    </select>
+                    <select id="priceFilter" class="form-select" style="max-width: 200px;">
+                        <option value="">Ціна</option>
+                        <option value="0-50000">До 50 000</option>
+                        <option value="50000-100000">50 000 - 100 000</option>
+                        <option value="100000-500000">100 000 - 500 000</option>
+                        <option value="500000-1000000">500 000 - 1 000 000</option>
+                        <option value="1000000+">Понад 1 000 000</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="propertiesContainer" class="row g-4">
+           
+        </div>
+
+        <div id="noResultsMessage" class="text-center mt-4" style="display: none;">
+            <h3>Жодної нерухомості не знайдено</h3>
+            <p>Спробуйте змінити параметри пошуку</p>
+        </div>
+
+        <nav aria-label="Навігація сторінками" class="mt-4">
+            <ul id="pagination" class="pagination justify-content-center">
+                
+            </ul>
+        </nav>
+    </div>
+
+    <script>
+        // Винесіть глобально змінні
+let allProperties = []; 
+let filteredProperties = [];
+const itemsPerPage = 12;
+let currentPage = 1;
+
+function filterProperties() {
+    const searchInput = document.getElementById('searchInput');
+    const typeFilter = document.getElementById('typeFilter');
+    const priceFilter = document.getElementById('priceFilter');
+
+    const searchQuery = searchInput.value.toLowerCase().trim();
+    const typeQuery = typeFilter.value;
+    const priceQuery = priceFilter.value;
+
+    filteredProperties = allProperties.filter(property => {
+        const matchesSearch = searchQuery === '' || 
+            property.title.toLowerCase().includes(searchQuery) ||
+            property.address.toLowerCase().includes(searchQuery) ||
+            property.type.toLowerCase().includes(searchQuery);
+        
+        const matchesType = !typeQuery || property.type === typeQuery;
+        const matchesPrice = !priceQuery || checkPriceRange(property.price, priceQuery);
+
+        return matchesSearch && matchesType && matchesPrice;
+    });
+
+    currentPage = 1;
+    renderProperties();
+    renderPagination();
+}
+
+function checkPriceRange(price, rangeStr) {
+    if (rangeStr === '1000000+') return price >= 1000000;
+    
+    const [min, max] = rangeStr.split('-').map(Number);
+    return price >= min && price < max;
+}
+
+// Функція перевірки діапазону цін
+function checkPriceRange(price, rangeStr) {
+    if (rangeStr === '1000000+') return price >= 1000000;
+    
+    const [min, max] = rangeStr.split('-').map(Number);
+    return price >= min && price < max;
+}
+
+// Додаємо детальну обробку подій
+document.addEventListener('DOMContentLoaded', function() {
+    const propertiesContainer = document.getElementById('propertiesContainer');
+    const searchInput = document.getElementById('searchInput');
+    const typeFilter = document.getElementById('typeFilter');
+    const priceFilter = document.getElementById('priceFilter');
+    const noResultsMessage = document.getElementById('noResultsMessage');
+    const pagination = document.getElementById('pagination');
+
+    let allProperties = []; // Повний масив нерухомостей
+    let filteredProperties = []; // Відфільтровані нерухомості
+    const itemsPerPage = 12; // Кількість елементів на сторінці
+    let currentPage = 1;
+    
+    fetch('/api/properties')
+.then(response => response.ok ? response.json() : Promise.reject('Помилка'))
+.then(properties => {
+    allProperties = properties;
+    filteredProperties = properties;
+    
+    // Додайте прив'язку подій ПІСЛЯ завантаження даних
+    document.getElementById('searchInput').addEventListener('input', filterProperties);
+    document.getElementById('typeFilter').addEventListener('change', filterProperties);
+    document.getElementById('priceFilter').addEventListener('change', filterProperties);
+
+    renderProperties();
+    renderPagination();
+})
+.catch(error => {
+    console.error('Помилка завантаження нерухомостей:', error);
+    document.getElementById('noResultsMessage').textContent = 'Помилка завантаження даних';
+    document.getElementById('noResultsMessage').style.display = 'block';
+});
+
+    // Функція рендерингу нерухомостей
+    function renderProperties() {
+        propertiesContainer.innerHTML = '';
+                
+        // Визначення діапазону для поточної сторінки
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const paginatedProperties = filteredProperties.slice(start, end);
+
+        // Оновлена логіка відображення результатів
+        if (filteredProperties.length === 0) {
+            noResultsMessage.textContent = 'Жодної нерухомості не знайдено. Змініть параметри пошуку.';
+            noResultsMessage.style.display = 'block';
+        } else {
+            noResultsMessage.style.display = 'none';
+        }
+
+        
+        paginatedProperties.forEach(property => {
+    const card = document.createElement('div');
+    card.className = 'col-md-4 col-lg-3 mb-4';
+    card.innerHTML = `
+        <div class="card property-card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">${property.title}</h5>
+                        <p class="card-text">
+                            <span class="badge bg-primary mb-2">${property.type}</span>
+                            <br>
+                            <strong>Адреса:</strong> ${property.address}<br>
+                            <strong>Ціна:</strong> ${property.price.toLocaleString()} грн<br>
+                            <strong>Статус:</strong> ${property.status}
+                        </p>
+                    </div>
+                </div>
+    `;
+    card.addEventListener('click', () => {
+        window.location.href = `/property-details/${property.id}`;
+    });
+    propertiesContainer.appendChild(card);
+});
+    }
+
+    // Функція рендерингу пагінації
+    function renderPagination() {
+        pagination.innerHTML = '';
+        const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
+
+        // Попередня сторінка
+        if (currentPage > 1) {
+            const prevLi = document.createElement('li');
+            prevLi.className = 'page-item';
+            prevLi.innerHTML = '<a class="page-link" href="#">Попередня</a>';
+            prevLi.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderProperties();
+                    renderPagination();
+                }
+            });
+            pagination.appendChild(prevLi);
+        }
+
+        // Номери сторінок
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.addEventListener('click', (e) => {
+                e.preventDefault();
+                currentPage = i;
+                renderProperties();
+                renderPagination();
+            });
+            pagination.appendChild(li);
+        }
+
+        // Наступна сторінка
+        if (currentPage < totalPages) {
+            const nextLi = document.createElement('li');
+            nextLi.className = 'page-item';
+            nextLi.innerHTML = '<a class="page-link" href="#">Наступна</a>';
+            nextLi.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderProperties();
+                    renderPagination();
+                }
+            });
+            pagination.appendChild(nextLi);
+        }
+    }
+
+    // Додавання слухачів подій для пошуку та фільтрації
+    searchInput.addEventListener('input', filterProperties);
+    typeFilter.addEventListener('change', filterProperties);
+    priceFilter.addEventListener('change', filterProperties);
+}); 
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    fetch('/auth-status')
+        .then(response => response.json())
+        .then(data => {
+            const navMenu = document.querySelector('nav ul');
+
+            // Початкове меню
+            navMenu.innerHTML = `
+                <li><a href="/">Головна</a></li>
+            `;
+
+            if (data.isLoggedIn) {
+                if (data.role === 'admin') {
+                    // Якщо адміністратор
+                    navMenu.innerHTML += `
+                        <li><a href="/admin">Адмін панель</a></li>
+                    `;
+                } else {
+                    // Якщо звичайний користувач
+                    navMenu.innerHTML += `
+                        <li><a href="/profile">Мій кабінет</a></li>
+                        <li><a href="/properties">Додати нерухомість</a></li>
+                        <li><a href="/catalog">Каталог</a></li>
+                    `;
+                }
+            } else {
+                // Якщо неавторизований
+                navMenu.innerHTML += `
+                    <li><a href="/login">Авторизація</a></li>
+                `;
+            }
+
+            // Додаємо спільне посилання
+            navMenu.innerHTML += `
+                <li><a href="/faq">FAQ</a></li>
+            `;
+        })
+        .catch(err => console.error("Помилка при перевірці авторизації:", err));
+});
+
+</script>
+</body>
+<footer>
+    <div class="container">
+        <p>&copy; 2024 CRM для нерухомості. Всі права захищені.</p>
+        <a href="tel:+380951804016"><i class="fas fa-phone"></i></a>
+        <a href="mailto:info@realestate-crm.com"><i class="fas fa-envelope"></i></a>
+        <a href="https://t.me/realtyua"><i class="fab fa-telegram"></i></a>
+        <a href="viber://chat?number=%2B380951804016"><i class="fab fa-viber"></i></a>
+    </div>
+</footer>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Реєстрація - CRM для нерухомості</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="css/register.css">
+    <link rel="stylesheet" href="css/register.css">
+</head>
+<style>
+   
+    nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: flex-end;
+    }
+    nav ul li {
+        margin: 0 10px;
+    }
+    nav ul li a {
+        color: #fff;
+        text-decoration: none;
+        font-size: 16px;
+    }
+    main {
+        margin: 30px auto;
+        max-width: 900px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #343a40;
+    }
+    label {
+        display: block;
+        margin: 10px 0 5px;
+        font-weight: bold;
+    }
+    input, select, textarea, button {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #373b3f;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+    button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    
+   
+</style>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="/">CRM для нерухомості</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Головна</a></li>
+                <li><a href="/faq">FAQ</a></li>
+                
+                
+                <li class="auth-buttons">
+                    <a href="/login">Авторизація</a>
+                </li>
+                
+                
+                <li class="user-info" style="display:none;">
+                    <a href="/profile"></a>
+                </li>
+                
+                
+                <li class="admin-link" style="display:none;">
+                    <a href="/admin">Адмін панель</a>
+                </li>
+                
+                
+                <li class="logout-link" style="display:none;">
+                    <a href="/logout">Вийти</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+<main>
+    <div class="container">
+        <h2 class="RM_center">Опишіть нерухомість</h2>
+        <form action="/properties" method="POST">
+            <label for="title">Назва об'єкта</label>
+            <input type="text" id="title" name="title" placeholder="Введіть назву" required>
+        
+            <label for="type">Тип нерухомості</label>
+            <select id="type" name="type" required>
+                <option value="квартира">Квартира</option>
+                <option value="будинок">Будинок</option>
+                <option value="комерційна нерухомість">Комерційна нерухомість</option>
+                <option value="земля">Земля</option>
+            </select>
+        
+            <label for="address">Адреса</label>
+            <input type="text" id="address" name="address" placeholder="Введіть адресу" required>
+        
+            <label for="price">Ціна (грн)</label>
+            <input type="number" id="price" name="price" placeholder="Введіть ціну" step="0.01" required>
+        
+            <label for="area">Площа (м²)</label>
+            <input type="number" id="area" name="area" placeholder="Введіть площу" step="0.01" required>
+        
+            <label for="rooms">Кількість кімнат</label>
+            <input type="number" id="rooms" name="rooms" placeholder="Введіть кількість кімнат" required>
+        
+            <label for="status">Статус</label>
+            <select id="status" name="status" required>
+                <option value="доступно">Доступно</option>
+                <!-- <option value="продано">Продано</option>
+                <option value="орендується">Орендується</option> -->
+            </select>
+        
+            <label for="description">Опис</label>
+            <textarea id="description" name="description" placeholder="Опишіть об'єкт" rows="5" required></textarea>
+        
+            <button type="submit">Додати об'єкт</button>
+        </form>
+        
+    </div>
+</main>
+<script>
+      document.addEventListener('DOMContentLoaded', function() {
+    fetch('/auth-status')
+        .then(response => response.json())
+        .then(data => {
+            const navMenu = document.querySelector('nav ul');
+
+            
+            navMenu.innerHTML = `
+                <li><a href="/">Головна</a></li>
+            `;
+
+            if (data.isLoggedIn) {
+                if (data.user.role === 'agent') {
+                    
+                    navMenu.innerHTML += `
+                        <li><a href="/admin">Адмін панель</a></li>
+                        
+                    `;
+                } else if (data.user.role === 'user') {
+                    
+                    navMenu.innerHTML += `
+                        <li><a href="/catalog">Каталог</a></li>
+                        <li><a href="/catalog">Каталог</a></li>
+                        <li><a href="/properties">Додати нерухомість</a></li>
+                        <li><a href="/profile">Мій кабінет</a></li>
+                    `;
+                }
+
+            } else {
+                
+                navMenu.innerHTML += `
+                    <li><a href="/login">Авторизація</a></li>
+                    <li><a href="/faq">FAQ</a></li>
+                `;
+            }
+        })
+        .catch(err => console.error("Помилка при перевірці авторизації:", err));
+});
+
+
+    
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+    
+
+    
+    if (message) {
+      alert(message);
+    }
+    
+  </script>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2024 CRM для нерухомості. Всі права захищені.</p>
+        <a href="tel:+380951804016"><i class="fas fa-phone"></i></a>
+        <a href="mailto:info@realestate-crm.com"><i class="fas fa-envelope"></i></a>
+        <a href="https://t.me/realtyua"><i class="fab fa-telegram"></i></a>
+        <a href="viber://chat?number=%2B380951804016"><i class="fab fa-viber"></i></a>
+    </div>
+</footer>
+</body>
+<script src="/js/auth.js"></script>
+</html>

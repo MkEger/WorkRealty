@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Деталі нерухомості</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="css/register.css">
+</head>
+<style>
+    * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+html, body {
+    color: #332c2c;
+    height: 100%;
+}
+body {
+    background-color: rgb(32, 32, 32) !important;
+    color: white !important; 
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+}
+container {
+    width: 90%;
+    margin: auto;
+    overflow: hidden;
+}
+header {
+    background: #35424a;
+    
+    padding-top: 30px;
+    min-height: 85px;
+    border-bottom: #e8491d 3px solid;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.logo a {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #efefef;
+    text-decoration: none;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links li {
+    margin-left: 20px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #fff8f8;
+    transition: color 0.3s ease;
+}
+.RM_center{
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+}
+.nav-links a:hover {
+    color: #007bff;
+}
+main {
+    flex: 1 0 auto;
+    margin-top: 5%;
+}
+.content {
+    flex: 1 0 auto;
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+     
+}
+form {
+    max-width: 300px;
+    width: 100%; 
+    background-color: #444; 
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+form {
+    max-width: 400px;
+    margin: 30px auto;
+}
+input[type="email"],
+input[type="password"],
+input[type="text"],
+input[type="date"],
+select,
+input[type="file"],
+input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+input[type="submit"] {
+    background-color: #e8491d;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+footer {
+    flex-shrink: 0;
+    padding: 20px;
+    color: #ffffff;
+    background-color: #191818;
+    text-align: center;
+}
+footer a {
+    color: #ffffff;
+    font-size: 24px;
+    margin: 0 10px;
+}
+@media(max-width: 768px) {
+    header h1, nav, nav li {
+        float: none;
+        text-align: center;
+        width: 100%;
+    }
+}
+</style>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="/">CRM для нерухомості</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Головна</a></li>
+                <li><a href="/faq">FAQ</a></li>
+                
+                
+                <li class="auth-buttons">
+                    <a href="/login">Авторизація</a>
+                </li>
+                
+                
+                <li class="user-info" style="display:none;">
+                    <a href="/profile"></a>
+                </li>
+                
+                
+                <li class="admin-link" style="display:none;">
+                    <a href="/admin">Адмін панель</a>
+                </li>
+                
+                
+                <li class="logout-link" style="display:none;">
+                    <a href="/properties">Додати нерухомість</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container mt-5">
+        <div id="propertyDetails">
+            
+        </div>
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const propertyId = window.location.pathname.split('/').pop();
+    
+    fetch(`/api/property-details/${propertyId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(property => {
+            const detailsHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h2>${property.title}</h2>
+                    </div>
+                    <div class="card-body">
+                        <h3>Деталі нерухомості</h3>
+                        <p><strong>Тип:</strong> ${property.type}</p>
+                        <p><strong>Адреса:</strong> ${property.address}</p>
+                        <p><strong>Ціна:</strong> ${property.price} грн</p>
+                        <p><strong>Площа:</strong> ${property.area} м²</p>
+                        <p><strong>Кількість кімнат:</strong> ${property.rooms}</p>
+                        <p><strong>Статус:</strong> ${property.status}</p>
+                        <p><strong>Опис:</strong> ${property.description}</p>
+                        
+                        <h3 class="mt-4">Інформація про власника</h3>
+                        <p><strong>ПІБ:</strong> ${property.name} ${property.surname}</p>
+                        <p><strong>Електронна пошта для зв'язку:</strong> ${property.email}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('propertyDetails').innerHTML = detailsHTML;
+        })
+        .catch(error => {
+            console.error('Detailed error:', error);
+            document.getElementById('propertyDetails').innerHTML = 
+                `<div class="alert alert-danger">Не вдалося завантажити деталі нерухомості. Помилка: ${error.message}</div>`;
+        });
+});
+    </script>
+    <script>
+       document.addEventListener('DOMContentLoaded', function() {
+    fetch('/auth-status')
+        .then(response => response.json())
+        .then(data => {
+            const navMenu = document.querySelector('nav ul');
+
+            
+            navMenu.innerHTML = `
+                <li><a href="/">Головна</a></li>
+            `;
+
+            if (data.isLoggedIn) {
+                if (data.role === 'admin') {
+                    
+                    navMenu.innerHTML += `
+                        <li><a href="/admin">Адмін панель</a></li>
+                    `;
+                } else {
+                    
+                    navMenu.innerHTML += `
+                        <li><a href="/profile">Мій кабінет</a></li>
+                        <li><a href="/properties">Додати нерухомість</a></li>
+                        <li><a href="/catalog">Каталог</a></li>
+                    `;
+                }
+            } else {
+                
+                navMenu.innerHTML += `
+                    <li><a href="/login">Авторизація</a></li>
+                `;
+            }
+
+            
+            navMenu.innerHTML += `
+                <li><a href="/faq">FAQ</a></li>
+            `;
+        })
+        .catch(err => console.error("Помилка при перевірці авторизації:", err));
+});
+
+    </script>
+</body>
+<footer>
+    <div class="container">
+        <p>&copy; 2024 CRM для нерухомості. Всі права захищені.</p>
+        <a href="tel:+380951804016"><i class="fas fa-phone"></i></a>
+        <a href="mailto:info@realestate-crm.com"><i class="fas fa-envelope"></i></a>
+        <a href="https://t.me/realtyua"><i class="fab fa-telegram"></i></a>
+        <a href="viber://chat?number=%2B380951804016"><i class="fab fa-viber"></i></a>
+    </div>
+</footer>
+</html>
