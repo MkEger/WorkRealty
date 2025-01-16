@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - CRM для нерухомості</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="css/faq.css" >
+</head>
+<body>
+<div class="content-wrapper">
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="/">CRM для нерухомості</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Головна</a></li>
+                <li><a href="/faq">FAQ</a></li>
+                
+                <!-- Динамічні посилання -->
+                <li class="auth-buttons">
+                    <a href="/login">Авторизація</a>
+                </li>
+                
+                <!-- Посилання для авторизованих -->
+                <li class="user-info" style="display:none;">
+                    <a href="/profile"></a>
+                </li>
+                
+                <!-- Адмін-панель (з перевіркою прав) -->
+                <li class="admin-link" style="display:none;">
+                    <a href="/admin">Адмін панель</a>
+                </li>
+                
+                <!-- Вихід -->
+                <li class="logout-link" style="display:none;">
+                    <a href="/properties">Додати нерухомість</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <h2>Часті запитання (FAQ)</h2>
+        <div class="faq-item">
+            <div class="faq-question">Як додати новий об'єкт нерухомості?</div>
+            <div class="faq-answer">Увійдіть в систему як агент, перейдіть до розділу "Об'єкти" та натисніть кнопку "Додати новий об'єкт". Заповніть всі необхідні поля та натисніть "Зберегти".</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-question">Як зв'язатися з агентом щодо конкретного об'єкта?</div>
+            <div class="faq-answer">На сторінці об'єкта ви знайдете контактну інформацію агента. Ви можете зв'язатися з ним за допомогою телефону або електронної пошти.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-question">Як оновити інформацію про об'єкт?</div>
+            <div class="faq-answer">Увійдіть в систему, перейдіть до списку ваших об'єктів, виберіть потрібний об'єкт та натисніть кнопку "Редагувати". Внесіть необхідні зміни та збережіть їх.</div>
+        </div>
+    </div>
+</div>
+<footer>
+    <div class="container">
+        <p>&copy; 2024 CRM для нерухомості. Всі права захищені.</p>
+        <a href="tel:+380951804016"><i class="fas fa-phone"></i></a>
+        <a href="mailto:info@realestate-crm.com"><i class="fas fa-envelope"></i></a>
+        <a href="https://t.me/realtyua"><i class="fab fa-telegram"></i></a>
+        <a href="viber://chat?number=%2B380951804016"><i class="fab fa-viber"></i></a>
+    </div>
+</footer>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    fetch('/auth-status')
+        .then(response => response.json())
+        .then(data => {
+            const navMenu = document.querySelector('nav ul');
+
+            // Початкове меню
+            navMenu.innerHTML = `
+                <li><a href="/">Головна</a></li>
+            `;
+
+            if (data.isLoggedIn) {
+                if (data.role === 'admin') {
+                    // Якщо адміністратор
+                    navMenu.innerHTML += `
+                        <li><a href="/admin">Адмін панель</a></li>
+                    `;
+                } else {
+                    // Якщо звичайний користувач
+                    navMenu.innerHTML += `
+                        <li><a href="/profile">Мій кабінет</a></li>
+                        <li><a href="/properties">Додати нерухомість</a></li>
+                        <li><a href="/catalog">Каталог</a></li>
+                    `;
+                }
+            } else {
+                // Якщо неавторизований
+                navMenu.innerHTML += `
+                    <li><a href="/login">Авторизація</a></li>
+                `;
+            }
+
+            // Додаємо спільне посилання
+            navMenu.innerHTML += `
+                <li><a href="/faq">FAQ</a></li>
+            `;
+        })
+        .catch(err => console.error("Помилка при перевірці авторизації:", err));
+});
+
+</script>
+</html>

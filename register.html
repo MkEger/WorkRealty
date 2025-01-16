@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Реєстрація - CRM для нерухомості</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="css/register.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="/">CRM для нерухомості</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Головна</a></li>
+                <li><a href="/faq">FAQ</a></li>
+                
+                
+                <li class="auth-buttons">
+                    <a href="/login">Авторизація</a>
+                </li>
+                
+                
+                <li class="user-info" style="display:none;">
+                    <a href="/profile"></a>
+                </li>
+                
+                
+                <li class="admin-link" style="display:none;">
+                    <a href="/admin">Адмін панель</a>
+                </li>
+                
+                
+                <li class="logout-link" style="display:none;">
+                    <a href="/properties">Додати нерухомість</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div class="container">
+            <h2 class="RM_center">Реєстрація</h2>
+            <form action="/register" method="post" enctype="multipart/form-data" id="registrationForm">
+                <input type="email" id="email" name="email" placeholder="Email" required>
+                <small class="error-message" style="color: red; display: none;">Невірний формат email</small>
+    
+                <input type="password" name="password" placeholder="Пароль" required minlength="8">
+                <small class="error-message" style="color: red; display: none;">Пароль має містити щонайменше 8 символів</small>
+    
+                <input type="text" name="surname" placeholder="Прізвище" required pattern="^[А-Яа-яІіЇїҐґ'’]+$">
+                <small class="error-message" style="color: red; display: none;">Прізвище має містити тільки літери</small>
+    
+                <input type="text" name="name" placeholder="Ім'я" required pattern="^[А-Яа-яІіЇїҐґ'’]+$">
+                <small class="error-message" style="color: red; display: none;">Ім'я має містити тільки літери</small>
+    
+                <input type="text" name="patronymic" placeholder="По батькові">
+    
+                <input type="date" name="birthdate" required>
+                <small class="error-message" style="color: red; display: none;">Дата народження є обов'язковою</small>
+    
+                <select name="group" required>
+                    <option value="">Виберіть групу</option>
+                    <option value="buyer">Покупець</option>
+                    <option value="seller">Продавець</option>
+                </select>
+                <small class="error-message" style="color: red; display: none;">Оберіть групу</small>
+    
+                <input type="submit" value="Зареєструватися">
+            </form>
+        </div>
+    </main>
+<script>
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+    const error = urlParams.get('error');
+
+    
+    if (message) {
+        alert(decodeURIComponent(message)); 
+    } else if (error) {
+        alert(decodeURIComponent(error));  
+    }
+</script>
+<script>
+     document.addEventListener('DOMContentLoaded', function() {
+    fetch('/auth-status')
+        .then(response => response.json())
+        .then(data => {
+            const navMenu = document.querySelector('nav ul');
+
+            
+            navMenu.innerHTML = `
+                <li><a href="/">Головна</a></li>
+            `;
+
+            if (data.isLoggedIn) {
+                if (data.user.role === 'agent') {
+                   
+                    navMenu.innerHTML += `
+                        <li><a href="/admin">Адмін панель</a></li>
+                        
+                    `;
+                } else if (data.user.role === 'user') {
+                    
+                    navMenu.innerHTML += `
+                        <li><a href="/catalog">Каталог</a></li>
+                        <li><a href="/catalog">Каталог</a></li>
+                        <li><a href="/properties">Додати нерухомість</a></li>
+                        <li><a href="/profile">Мій кабінет</a></li>
+                    `;
+                }
+
+            } else {
+                
+                navMenu.innerHTML += `
+                    <li><a href="/login">Авторизація</a></li>
+                    <li><a href="/faq">FAQ</a></li>
+                `;
+            }
+        })
+        .catch(err => console.error("Помилка при перевірці авторизації:", err));
+});
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/inputmask/5.0.7-beta.0/inputmask.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("registrationForm");
+
+        // Додаємо маску для email
+        Inputmask({
+            alias: "email",
+            placeholder: "*",
+        }).mask("#email");
+
+        form.addEventListener("submit", function (event) {
+            const inputs = form.querySelectorAll("input, select");
+            let isValid = true;
+
+            // Очищуємо попередні повідомлення про помилки
+            const errorMessages = document.querySelectorAll(".error-message");
+            errorMessages.forEach((message) => (message.style.display = "none"));
+
+            inputs.forEach((input) => {
+                if (!input.checkValidity()) {
+                    isValid = false;
+                    const error = input.nextElementSibling;
+                    if (error && error.classList.contains("error-message")) {
+                        error.style.display = "block";
+                    }
+                }
+            });
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+<footer>
+    <div class="container">
+        <p>&copy; 2024 CRM для нерухомості. Всі права захищені.</p>
+        <a href="tel:+380951804016"><i class="fas fa-phone"></i></a>
+        <a href="mailto:info@realestate-crm.com"><i class="fas fa-envelope"></i></a>
+        <a href="https://t.me/realtyua"><i class="fab fa-telegram"></i></a>
+        <a href="viber://chat?number=%2B380951804016"><i class="fab fa-viber"></i></a>
+    </div>
+</footer>
+</body>
+<script src="/js/auth.js"></script>
+</html>
+
